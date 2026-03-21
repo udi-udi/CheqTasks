@@ -52,3 +52,10 @@
 - [x] 7.2 Write unit tests for `TasksController` in `test/tasks.controller.spec.ts`
 - [x] 7.3 Mock repository/in-memory store calls with Jest
 - [x] 7.4 Achieve 80%+ line coverage (`npm run test:cov`)
+
+## Phase 8 — Dockerization
+
+- [x] 8.1 Write a multi-stage `Dockerfile` optimized for production
+  - [x] Stage 1 (builder): install all dependencies and compile TypeScript
+  - [x] Stage 2 (runner): copy only `dist/` and production `node_modules`, use a minimal Node image
+- [x] 8.2 Add a `.dockerignore` to exclude `node_modules`, `dist`, `.env`, and test files
