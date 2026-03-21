@@ -1,0 +1,16 @@
+{
+  "name": "cheqtasks-infra",
+  "version": "1.0.0",
+  "scripts": {
+    "cdk": "cdk"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.244.0",
+    "constructs": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "~5.5.0"
+  }
+}

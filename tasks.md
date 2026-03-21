@@ -59,3 +59,20 @@
   - [x] Stage 1 (builder): install all dependencies and compile TypeScript
   - [x] Stage 2 (runner): copy only `dist/` and production `node_modules`, use a minimal Node image
 - [x] 8.2 Add a `.dockerignore` to exclude `node_modules`, `dist`, `.env`, and test files
+
+## Phase 9 — Infrastructure as Code (AWS CDK)
+
+- [x] 9.1 Initialise a CDK app (`cdk init`) in an `infra/` subdirectory
+- [x] 9.2 Define a VPC with public subnet for the EC2 instance
+- [x] 9.3 Define an EC2 instance (t2.micro, Amazon Linux 2023)
+  - [x] Attach an IAM role with least-privilege permissions
+  - [x] Configure a security group (port 3000 inbound, port 22 for CI/CD SSH)
+- [x] 9.4 Add user-data script to clone repo, build Docker image and run container on boot
+- [x] 9.5 Export the instance public IP/DNS as a CDK output
+
+## Phase 10 — CI/CD Pipeline (GitHub Actions)
+
+- [x] 10.1 Create `.github/workflows/ci-cd.yml`
+- [x] 10.2 On push: run unit tests (`npm test`)
+- [x] 10.3 On push to `main`: build the Docker image on EC2
+- [x] 10.4 On push to `main`: deploy to the EC2 instance via SSH

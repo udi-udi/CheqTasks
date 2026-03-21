@@ -1,0 +1,50 @@
+name: CI/CD
+
+on:
+  push:
+    branches: ['**']
+
+jobs:
+  # ── Run tests on every push ──────────────────────────────────────────────────
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm test
+
+  # ── Deploy to EC2 on push to main ────────────────────────────────────────────
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /app
+            git pull
+            docker build -t cheqtasks .
+            docker stop cheqtasks || true
+            docker rm cheqtasks || true
+            DB_URL=$(aws secretsmanager get-secret-value \
+              --secret-id cheqtasks/database-url \
+              --region us-east-1 \
+              --query SecretString \
+              --output text)
+            docker run -d \
+              -p 3000:3000 \
+              -e DATABASE_URL="$DB_URL" \
+              --name cheqtasks \
+              --restart unless-stopped \
+              cheqtasks
