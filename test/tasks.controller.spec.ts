@@ -34,24 +34,24 @@ describe('TasksController', () => {
   });
 
   describe('getAllTasks', () => {
-    it('returns the list from the service', async () => {
-      mockTasksService.getAllTasks.mockResolvedValue([mockTask]);
+    it('returns data and total from the service', async () => {
+      mockTasksService.getAllTasks.mockResolvedValue({ data: [mockTask], total: 1 });
       const result = await controller.getAllTasks(defaultPagination);
-      expect(result).toEqual([mockTask]);
+      expect(result).toEqual({ data: [mockTask], total: 1 });
       expect(mockTasksService.getAllTasks).toHaveBeenCalledWith(defaultPagination);
     });
 
     it('forwards pagination params to the service', async () => {
-      mockTasksService.getAllTasks.mockResolvedValue([]);
+      mockTasksService.getAllTasks.mockResolvedValue({ data: [], total: 0 });
       const pagination: PaginationQueryDto = { limit: 5, offset: 10 };
       await controller.getAllTasks(pagination);
       expect(mockTasksService.getAllTasks).toHaveBeenCalledWith(pagination);
     });
 
-    it('returns an empty array when no tasks exist', async () => {
-      mockTasksService.getAllTasks.mockResolvedValue([]);
+    it('returns empty data and zero total when no tasks exist', async () => {
+      mockTasksService.getAllTasks.mockResolvedValue({ data: [], total: 0 });
       const result = await controller.getAllTasks(defaultPagination);
-      expect(result).toEqual([]);
+      expect(result).toEqual({ data: [], total: 0 });
     });
   });
 

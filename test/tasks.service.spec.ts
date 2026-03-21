@@ -14,7 +14,7 @@ const mockTask: TaskEntity = {
 };
 
 const mockRepository = {
-  find: jest.fn(),
+  findAndCount: jest.fn(),
   create: jest.fn(),
   save: jest.fn(),
 };
@@ -35,23 +35,32 @@ describe('TasksService', () => {
   });
 
   describe('getAllTasks', () => {
-    it('returns tasks from the repository with pagination', async () => {
-      mockRepository.find.mockResolvedValue([mockTask]);
+    it('returns data and total from the repository with pagination', async () => {
+      mockRepository.findAndCount.mockResolvedValue([[mockTask], 1]);
       const result = await service.getAllTasks({ limit: 20, offset: 0 });
-      expect(result).toEqual([mockTask]);
-      expect(mockRepository.find).toHaveBeenCalledWith({ take: 20, skip: 0, order: { createdAt: 'DESC' } });
+      expect(result).toEqual({ data: [mockTask], total: 1 });
+      expect(mockRepository.findAndCount).toHaveBeenCalledWith({ take: 20, skip: 0, order: { createdAt: 'DESC' } });
     });
 
     it('passes limit and offset to the repository', async () => {
-      mockRepository.find.mockResolvedValue([]);
+      mockRepository.findAndCount.mockResolvedValue([[], 0]);
       await service.getAllTasks({ limit: 5, offset: 10 });
-      expect(mockRepository.find).toHaveBeenCalledWith({ take: 5, skip: 10, order: { createdAt: 'DESC' } });
+      expect(mockRepository.findAndCount).toHaveBeenCalledWith({ take: 5, skip: 10, order: { createdAt: 'DESC' } });
     });
 
-    it('returns an empty array when no tasks exist', async () => {
-      mockRepository.find.mockResolvedValue([]);
+    it('returns 5 results and total of 20 when fetching page 3 of a 20-task dataset', async () => {
+      const page = Array.from({ length: 5 }, (_, i) => ({ ...mockTask, id: `uuid-${i + 11}` }));
+      mockRepository.findAndCount.mockResolvedValue([page, 20]);
+      const result = await service.getAllTasks({ limit: 5, offset: 10 });
+      expect(result.data).toHaveLength(5);
+      expect(result.total).toBe(20);
+      expect(mockRepository.findAndCount).toHaveBeenCalledWith({ take: 5, skip: 10, order: { createdAt: 'DESC' } });
+    });
+
+    it('returns empty data and zero total when no tasks exist', async () => {
+      mockRepository.findAndCount.mockResolvedValue([[], 0]);
       const result = await service.getAllTasks({ limit: 20, offset: 0 });
-      expect(result).toEqual([]);
+      expect(result).toEqual({ data: [], total: 0 });
     });
   });
 
@@ -87,13 +96,13 @@ describe('TasksService', () => {
   });
 
   describe('getAllTasks error handling', () => {
-    it('throws InternalServerErrorException when repository find fails', async () => {
-      mockRepository.find.mockRejectedValue(new Error('DB read error'));
+    it('throws InternalServerErrorException when repository findAndCount fails', async () => {
+      mockRepository.findAndCount.mockRejectedValue(new Error('DB read error'));
       await expect(service.getAllTasks({ limit: 20, offset: 0 })).rejects.toThrow(InternalServerErrorException);
     });
 
-    it('throws InternalServerErrorException when repository find rejects with a non-Error value', async () => {
-      mockRepository.find.mockRejectedValue('string error');
+    it('throws InternalServerErrorException when repository findAndCount rejects with a non-Error value', async () => {
+      mockRepository.findAndCount.mockRejectedValue('string error');
       await expect(service.getAllTasks({ limit: 20, offset: 0 })).rejects.toThrow(InternalServerErrorException);
     });
   });

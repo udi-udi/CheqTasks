@@ -5,9 +5,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { AppLogger } from './common/logger/app-logger';
 
 if (!process.env.DATABASE_URL) {
-  console.error(
+  AppLogger.error(
     '[CheqTasks] Fatal: DATABASE_URL is not set.\n' +
     'Create a .env file (or set the environment variable) with:\n' +
     '  DATABASE_URL=postgresql://<user>:<password>@<host>/<db>',

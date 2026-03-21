@@ -2,6 +2,7 @@ import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '../src/common/guards/auth.guard';
 import { LoggerMiddleware } from '../src/common/middleware/logger.middleware';
 import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter';
+import { AppLogger } from '../src/common/logger/app-logger';
 import { plainToInstance } from 'class-transformer';
 import { PaginationQueryDto } from '../src/tasks/dto/pagination-query.dto';
 
@@ -79,12 +80,12 @@ describe('LoggerMiddleware', () => {
     const req = { method: 'GET', path: '/tasks' } as any;
     const res = {} as any;
     const next = jest.fn();
-    const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    const spy = jest.spyOn(AppLogger, 'log').mockImplementation(() => {});
 
     middleware.use(req, res, next);
 
     expect(next).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('GET /tasks'));
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('GET /tasks'), expect.any(String));
     spy.mockRestore();
   });
 });

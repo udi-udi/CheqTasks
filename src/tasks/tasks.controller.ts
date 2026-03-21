@@ -3,6 +3,7 @@ import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/s
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
+import { PaginatedTasksDto } from './dto/paginated-tasks.dto';
 import { TaskEntity } from './task.entity';
 
 @ApiTags('tasks')
@@ -14,9 +15,9 @@ export class TasksController {
   @ApiOperation({ summary: 'Retrieve tasks', description: 'Returns a paginated list of tasks ordered by creation date (newest first). Defaults: limit=20, offset=0.' })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 20, description: 'Number of tasks to return (1–100)' })
   @ApiQuery({ name: 'offset', required: false, type: Number, example: 0, description: 'Number of tasks to skip' })
-  @ApiResponse({ status: 200, description: 'Paginated list of tasks', type: [TaskEntity] })
+  @ApiResponse({ status: 200, description: 'Paginated list of tasks with total count', type: PaginatedTasksDto })
   @ApiResponse({ status: 500, description: 'Database error' })
-  getAllTasks(@Query() pagination: PaginationQueryDto): Promise<TaskEntity[]> {
+  getAllTasks(@Query() pagination: PaginationQueryDto): Promise<{ data: TaskEntity[]; total: number }> {
     return this.tasksService.getAllTasks(pagination);
   }
 
