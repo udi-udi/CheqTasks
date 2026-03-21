@@ -1,5 +1,5 @@
 {
-  "name": "cheqtask",
+  "name": "cheqtasks",
   "version": "1.0.0",
   "description": "",
   "main": "dist/main.js",
@@ -28,7 +28,8 @@
       "!src/**/*.module.ts"
     ],
     "coverageDirectory": "coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "setupFiles": ["<rootDir>/test/setup.ts"]
   },
   "dependencies": {
     "@nestjs/common": "^11.1.17",
