@@ -8,6 +8,10 @@ export class TaskEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
+  @ApiProperty({ example: 'user-123', description: 'ID of the user who owns this task' })
+  @Column({ name: 'user_id' })
+  userId!: string;
+
   @ApiProperty({ example: 'Buy groceries', description: 'Short task title', maxLength: 100 })
   @Column({ length: 100 })
   title!: string;

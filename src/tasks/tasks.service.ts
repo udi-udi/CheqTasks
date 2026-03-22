@@ -14,9 +14,9 @@ export class TasksService {
     private readonly tasksRepository: Repository<TaskEntity>,
   ) {}
 
-  async getAllTasks({ limit, offset }: PaginationQueryDto): Promise<{ data: TaskEntity[]; total: number }> {
+  async getAllTasks({ limit, offset }: PaginationQueryDto, userId: string): Promise<{ data: TaskEntity[]; total: number }> {
     try {
-      const [data, total] = await this.tasksRepository.findAndCount({ take: limit, skip: offset, order: { createdAt: 'DESC' } });
+      const [data, total] = await this.tasksRepository.findAndCount({ where: { userId }, take: limit, skip: offset, order: { createdAt: 'DESC' } });
       return { data, total };
     } catch (error) {
       AppLogger.error('Failed to retrieve tasks', error instanceof Error ? error.stack : String(error), TasksService.name);
@@ -24,9 +24,9 @@ export class TasksService {
     }
   }
 
-  async createTask(dto: CreateTaskDto): Promise<TaskEntity> {
+  async createTask(dto: CreateTaskDto, userId: string): Promise<TaskEntity> {
     try {
-      const task = this.tasksRepository.create(dto);
+      const task = this.tasksRepository.create({ ...dto, userId });
       return await this.tasksRepository.save(task);
     } catch (error) {
       AppLogger.error('Failed to create task', error instanceof Error ? error.stack : String(error), TasksService.name);

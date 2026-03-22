@@ -9,6 +9,7 @@ const defaultPagination: PaginationQueryDto = { limit: 20, offset: 0 };
 
 const mockTask: TaskEntity = {
   id: 'uuid-1',
+  userId: 'user-1',
   title: 'Test task',
   description: 'A description',
   status: TaskStatus.OPEN,
@@ -36,21 +37,21 @@ describe('TasksController', () => {
   describe('getAllTasks', () => {
     it('returns data and total from the service', async () => {
       mockTasksService.getAllTasks.mockResolvedValue({ data: [mockTask], total: 1 });
-      const result = await controller.getAllTasks(defaultPagination);
+      const result = await controller.getAllTasks(defaultPagination, 'user-1');
       expect(result).toEqual({ data: [mockTask], total: 1 });
-      expect(mockTasksService.getAllTasks).toHaveBeenCalledWith(defaultPagination);
+      expect(mockTasksService.getAllTasks).toHaveBeenCalledWith(defaultPagination, 'user-1');
     });
 
     it('forwards pagination params to the service', async () => {
       mockTasksService.getAllTasks.mockResolvedValue({ data: [], total: 0 });
       const pagination: PaginationQueryDto = { limit: 5, offset: 10 };
-      await controller.getAllTasks(pagination);
-      expect(mockTasksService.getAllTasks).toHaveBeenCalledWith(pagination);
+      await controller.getAllTasks(pagination, 'user-1');
+      expect(mockTasksService.getAllTasks).toHaveBeenCalledWith(pagination, 'user-1');
     });
 
     it('returns empty data and zero total when no tasks exist', async () => {
       mockTasksService.getAllTasks.mockResolvedValue({ data: [], total: 0 });
-      const result = await controller.getAllTasks(defaultPagination);
+      const result = await controller.getAllTasks(defaultPagination, 'user-1');
       expect(result).toEqual({ data: [], total: 0 });
     });
   });
@@ -59,28 +60,28 @@ describe('TasksController', () => {
     it('delegates to the service and returns the new task', async () => {
       mockTasksService.createTask.mockResolvedValue(mockTask);
       const dto = { title: 'Test task', description: 'A description' };
-      const result = await controller.createTask(dto);
+      const result = await controller.createTask(dto, 'user-1');
       expect(result).toEqual(mockTask);
-      expect(mockTasksService.createTask).toHaveBeenCalledWith(dto);
+      expect(mockTasksService.createTask).toHaveBeenCalledWith(dto, 'user-1');
     });
 
     it('works without a description', async () => {
       const taskNoDesc = { ...mockTask, description: undefined };
       mockTasksService.createTask.mockResolvedValue(taskNoDesc);
-      const result = await controller.createTask({ title: 'Test task' });
+      const result = await controller.createTask({ title: 'Test task' }, 'user-1');
       expect(result.description).toBeUndefined();
     });
 
     it('propagates error when service throws', async () => {
       mockTasksService.createTask.mockRejectedValue(new Error('Service error'));
-      await expect(controller.createTask({ title: 'Test task' })).rejects.toThrow('Service error');
+      await expect(controller.createTask({ title: 'Test task' }, 'user-1')).rejects.toThrow('Service error');
     });
   });
 
   describe('getAllTasks error handling', () => {
     it('propagates error when service throws', async () => {
       mockTasksService.getAllTasks.mockRejectedValue(new Error('Service error'));
-      await expect(controller.getAllTasks(defaultPagination)).rejects.toThrow('Service error');
+      await expect(controller.getAllTasks(defaultPagination, 'user-1')).rejects.toThrow('Service error');
     });
   });
 });

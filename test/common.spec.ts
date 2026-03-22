@@ -1,6 +1,7 @@
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '../src/common/guards/auth.guard';
 import { LoggerMiddleware } from '../src/common/middleware/logger.middleware';
+import { UserIdMiddleware, isValidUserId } from '../src/common/middleware/user-id.middleware';
 import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter';
 import { AppLogger } from '../src/common/logger/app-logger';
 import { plainToInstance } from 'class-transformer';
@@ -69,6 +70,38 @@ describe('PaginationQueryDto', () => {
     const dto = plainToInstance(PaginationQueryDto, { limit: '5', offset: '10' });
     expect(dto.limit).toBe(5);
     expect(dto.offset).toBe(10);
+  });
+});
+
+// ── UserIdMiddleware ───────────────────────────────────────────────────────────
+
+describe('UserIdMiddleware', () => {
+  const makeReq = (userId?: string) => ({
+    headers: userId !== undefined ? { 'x-user-id': userId } : {},
+  } as any);
+
+  it('calls next() when x-user-id header is present', () => {
+    const middleware = new UserIdMiddleware();
+    const next = jest.fn();
+    middleware.use(makeReq('user-123'), {} as any, next);
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws BadRequestException when x-user-id header is missing', () => {
+    const middleware = new UserIdMiddleware();
+    expect(() => middleware.use(makeReq(), {} as any, jest.fn())).toThrow('x-user-id header is required');
+  });
+
+  it('throws BadRequestException when x-user-id is an empty string', () => {
+    const middleware = new UserIdMiddleware();
+    expect(() => middleware.use(makeReq(''), {} as any, jest.fn())).toThrow('x-user-id header is required');
+  });
+});
+
+describe('isValidUserId', () => {
+  it('returns true for any non-empty string (stub implementation)', () => {
+    expect(isValidUserId('user-123')).toBe(true);
+    expect(isValidUserId('anything')).toBe(true);
   });
 });
 
