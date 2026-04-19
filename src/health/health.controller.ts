@@ -1,4 +1,4 @@
-import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
+import {Controller, Get, Header, ServiceUnavailableException} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiProperty } from '@nestjs/swagger';
 import { HealthService } from './health.service';
 
@@ -28,5 +28,11 @@ export class HealthController {
       throw new ServiceUnavailableException({ status: 'error', uptime: process.uptime(), db: 'unreachable' });
     }
     return { status: 'ok', uptime: process.uptime(), db: 'ok' };
+  }
+
+  @Get('status')
+  @Header('Cache-Control', 'public, max-age=10')
+  getStatus() {
+    return { message: 'alive', time: Date.now() };
   }
 }
